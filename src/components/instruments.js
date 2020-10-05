@@ -1,9 +1,11 @@
 import React from "react";
 
-function Instruments() {
+function Instruments(props) {
+    var changeInstrument = props.changeHandler;
+
     return (
         <div>
-            <select id="instruments" size="2">
+            <select id="instruments" defaultValue={props.defaultInstrument} onChange={(e) => changeInstrument(e.target.value)} size="2">
                 <option>MSFT</option>
                 <option>AAPL</option>
                 <option>TSLA</option>

@@ -14,7 +14,7 @@ class Chart extends React.Component {
     };
     const options = {
       title: {
-          text: "Financial Charts"
+          text: this.props.instrument
       },
       charts: [{
           data: [{
