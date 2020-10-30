@@ -1,4 +1,4 @@
-const API_KEY = "AKYCO0FG5HDJ55QQ6Q3M";
+const API_KEY = "AKO3YPQTJOHFV1C1H47S";
 
 export const auth = {
     action:"auth", 

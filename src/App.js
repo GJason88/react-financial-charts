@@ -13,7 +13,10 @@ class App extends React.Component {
     super();
     this.state = {
       data: sampleData,
-      instrument: "MSFT"
+      instrument: "MSFT",
+      minDate: (new Date("2012-01-01")),
+      maxDate: (new Date("2012-01-23"))
+
     }
     this.changeInstrument = this.changeInstrument.bind(this);
   }
@@ -28,18 +31,23 @@ class App extends React.Component {
   }
 
   // update data when new pricing data comes in to cause a rerender of chart with updated data
-  updateSubscription() {
+  unsubscribe() {
     socket.send(JSON.stringify({action:"unsubscribe", params:"T." + this.state.instrument}));
     socket.onmessage = (e) => {
       console.log(e.data);
     };
   }
 
+  updateChart() {
+    
+  }
+
   changeInstrument(cur) {
-    this.updateSubscription();
+    this.unsubscribe();
     this.setState({
       instrument: cur
     })
+    this.updateChart();
   }
 
   handleWebSocket() {
@@ -71,7 +79,7 @@ class App extends React.Component {
       <header><Header /></header>
       <main>
         <Instruments defaultInstrument={this.state.instrument} changeHandler={this.changeInstrument} />
-        <Chart data={this.state.data} instrument={this.state.instrument} />
+        <Chart data={this.state.data} instrument={this.state.instrument} minDate={this.state.minDate} maxDate={this.state.maxDate} />
       </main>
     </div>
   );

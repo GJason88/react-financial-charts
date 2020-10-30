@@ -1,6 +1,5 @@
 import React from "react";
 import CanvasJSReact from '../canvasjs.stock.react';
-import sampleData from "./data/sample-data";
 
 var CanvasJS = CanvasJSReact.CanvasJS;
 var CanvasJSStockChart = CanvasJSReact.CanvasJSStockChart;
@@ -26,8 +25,8 @@ class Chart extends React.Component {
       }],
       navigator: {
         slider: {
-          minimum: new Date("2012-01-01"),
-          maximum: new Date("2012-01-23")
+          minimum: this.props.minDate,
+          maximum: this.props.maxDate
         }
       }
     };
