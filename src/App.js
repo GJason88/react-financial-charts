@@ -14,7 +14,7 @@ export default function App() {
   const [minDate, setMinDate] = useState(new Date("2012-01-01"));
   const [maxDate, setMaxDate] = useState(new Date("2012-01-23"));
 
-  // Handle web socket connection
+  // Connect to polygon websocket on didmount
   useEffect(function() {
     socket.onopen = (e) => {
       console.log("Open: Connection established to Polygon.io Stock Streaming WebSocket");
@@ -26,11 +26,11 @@ export default function App() {
     };
     socket.onclose = function(event) {
       if (event.wasClean) {
-        alert(`Close: Connection closed successfully, code=${event.code} reason=${event.reason}`);
+        console.log(`Close: Connection closed successfully, code=${event.code} reason=${event.reason}`);
       } else {
         // e.g. server process killed or network down
         // event.code is usually 1006 in this case
-        alert('Close: Connection died');
+        console.log('Close: Connection died');
       }
     };
     socket.onerror = function(error) {
@@ -38,36 +38,36 @@ export default function App() {
     };  
   }, []);
 
-  // Connect to new instrument websocket when changed
+  // Connect to new instrument websocket when instrument state changes
   useEffect(function() {
-    // socket.send(JSON.stringify({action:"subscribe", params:"T." + instrument}));
+    if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({action:"subscribe", params:"T." + instrument}));
   }, [instrument]);
 
+  // Handler function for 
   function changeInstrument(cur) {
-    unsubscribe();
+    if (socket.readyState === WebSocket.OPEN) {
+      // Disconnect from current instrument
+      socket.send(JSON.stringify({action:"unsubscribe", params:"T." + instrument}));
+      // Log unsubscribe message
+      socket.onmessage = (e) => {
+        console.log(e.data);
+      };
+    }
     setInstrument(cur);
     updateChart();
   }
 
-  // update data when new pricing data comes in to cause a rerender of chart with updated data
-  function unsubscribe() {
-    socket.send(JSON.stringify({action:"unsubscribe", params:"T." + instrument}));
-    socket.onmessage = (e) => {
-      console.log(e.data);
-    };
+  function updateChart() {
+    
   }
 
   return (
     <div className="app">
-      <header><Header /></header>
+      <header><Header inst={instrument} /></header>
       <main>
         <Instruments defaultInstrument={instrument} changeHandler={changeInstrument} />
         <Chart data={data} instrument={instrument} minDate={minDate} maxDate={maxDate} />
       </main>
     </div>
   );
-}
-
-function updateChart() {
-    
 }
