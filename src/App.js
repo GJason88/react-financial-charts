@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Chart from "./components/chart"
 import Header from "./components/header"
 import Instruments from "./components/instruments"
@@ -8,53 +8,18 @@ import {auth} from './configs';
 
 const socket = new WebSocket("wss://socket.polygon.io/stocks");
 
-class App extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      data: sampleData,
-      instrument: "MSFT",
-      minDate: (new Date("2012-01-01")),
-      maxDate: (new Date("2012-01-23"))
+export default function App() {
+  const [data, setData] = useState(sampleData);
+  const [instrument, setInstrument] = useState("MSFT");
+  const [minDate, setMinDate] = useState(new Date("2012-01-01"));
+  const [maxDate, setMaxDate] = useState(new Date("2012-01-23"));
 
-    }
-    this.changeInstrument = this.changeInstrument.bind(this);
-  }
-
-  componentDidMount() {
-    this.handleWebSocket();
-  }
-
-  componentDidUpdate() {
-    socket.send(JSON.stringify({action:"subscribe", params:"T." + this.state.instrument}));
-
-  }
-
-  // update data when new pricing data comes in to cause a rerender of chart with updated data
-  unsubscribe() {
-    socket.send(JSON.stringify({action:"unsubscribe", params:"T." + this.state.instrument}));
-    socket.onmessage = (e) => {
-      console.log(e.data);
-    };
-  }
-
-  updateChart() {
-    
-  }
-
-  changeInstrument(cur) {
-    this.unsubscribe();
-    this.setState({
-      instrument: cur
-    })
-    this.updateChart();
-  }
-
-  handleWebSocket() {
+  // Handle web socket connection
+  useEffect(function() {
     socket.onopen = (e) => {
       console.log("Open: Connection established to Polygon.io Stock Streaming WebSocket");
       socket.send(JSON.stringify(auth));
-      socket.send(JSON.stringify({action:"subscribe", params:"T." + this.state.instrument}));
+      socket.send(JSON.stringify({action:"subscribe", params:"T.MSFT"}));
       socket.onmessage = (e) => {
         console.log(`Message: Data received from server: ${e.data}`);
       };
@@ -70,20 +35,39 @@ class App extends React.Component {
     };
     socket.onerror = function(error) {
       alert(`Error: ${error.message}`);
+    };  
+  }, []);
+
+  // Connect to new instrument websocket when changed
+  useEffect(function() {
+    // socket.send(JSON.stringify({action:"subscribe", params:"T." + instrument}));
+  }, [instrument]);
+
+  function changeInstrument(cur) {
+    unsubscribe();
+    setInstrument(cur);
+    updateChart();
+  }
+
+  // update data when new pricing data comes in to cause a rerender of chart with updated data
+  function unsubscribe() {
+    socket.send(JSON.stringify({action:"unsubscribe", params:"T." + instrument}));
+    socket.onmessage = (e) => {
+      console.log(e.data);
     };
   }
 
-  render() {
-    return (
+  return (
     <div className="app">
       <header><Header /></header>
       <main>
-        <Instruments defaultInstrument={this.state.instrument} changeHandler={this.changeInstrument} />
-        <Chart data={this.state.data} instrument={this.state.instrument} minDate={this.state.minDate} maxDate={this.state.maxDate} />
+        <Instruments defaultInstrument={instrument} changeHandler={changeInstrument} />
+        <Chart data={data} instrument={instrument} minDate={minDate} maxDate={maxDate} />
       </main>
     </div>
   );
-  }
 }
 
-export default App;
+function updateChart() {
+    
+}
