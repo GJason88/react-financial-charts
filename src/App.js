@@ -14,13 +14,48 @@ export default function App() {
   const [minDate, setMinDate] = useState(new Date("2012-01-01"));
   const [maxDate, setMaxDate] = useState(new Date("2012-01-23"));
 
+  // Handle web socket connection
   useEffect(function() {
-    handleWebSocket();
+    socket.onopen = (e) => {
+      console.log("Open: Connection established to Polygon.io Stock Streaming WebSocket");
+      socket.send(JSON.stringify(auth));
+      socket.send(JSON.stringify({action:"subscribe", params:"T.MSFT"}));
+      socket.onmessage = (e) => {
+        console.log(`Message: Data received from server: ${e.data}`);
+      };
+    };
+    socket.onclose = function(event) {
+      if (event.wasClean) {
+        alert(`Close: Connection closed successfully, code=${event.code} reason=${event.reason}`);
+      } else {
+        // e.g. server process killed or network down
+        // event.code is usually 1006 in this case
+        alert('Close: Connection died');
+      }
+    };
+    socket.onerror = function(error) {
+      alert(`Error: ${error.message}`);
+    };  
   }, []);
 
+  // Connect to new instrument websocket when changed
   useEffect(function() {
-    socket.send(JSON.stringify({action:"subscribe", params:"T." + this.state.instrument}));
+    // socket.send(JSON.stringify({action:"subscribe", params:"T." + instrument}));
   }, [instrument]);
+
+  function changeInstrument(cur) {
+    unsubscribe();
+    setInstrument(cur);
+    updateChart();
+  }
+
+  // update data when new pricing data comes in to cause a rerender of chart with updated data
+  function unsubscribe() {
+    socket.send(JSON.stringify({action:"unsubscribe", params:"T." + instrument}));
+    socket.onmessage = (e) => {
+      console.log(e.data);
+    };
+  }
 
   return (
     <div className="app">
@@ -33,43 +68,6 @@ export default function App() {
   );
 }
 
-function changeInstrument(cur) {
-  unsubscribe();
-  setInstrument(cur);
-  updateChart();
-}
-
-// update data when new pricing data comes in to cause a rerender of chart with updated data
-function unsubscribe() {
-  socket.send(JSON.stringify({action:"unsubscribe", params:"T." + this.state.instrument}));
-  socket.onmessage = (e) => {
-    console.log(e.data);
-  };
-}
-
 function updateChart() {
     
-}
-
-function handleWebSocket() {
-  socket.onopen = (e) => {
-    console.log("Open: Connection established to Polygon.io Stock Streaming WebSocket");
-    socket.send(JSON.stringify(auth));
-    socket.send(JSON.stringify({action:"subscribe", params:"T." + this.state.instrument}));
-    socket.onmessage = (e) => {
-      console.log(`Message: Data received from server: ${e.data}`);
-    };
-  };
-  socket.onclose = function(event) {
-    if (event.wasClean) {
-      alert(`Close: Connection closed successfully, code=${event.code} reason=${event.reason}`);
-    } else {
-      // e.g. server process killed or network down
-      // event.code is usually 1006 in this case
-      alert('Close: Connection died');
-    }
-  };
-  socket.onerror = function(error) {
-    alert(`Error: ${error.message}`);
-  };
 }
