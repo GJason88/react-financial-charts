@@ -1,3 +1,4 @@
+require('dotenv').config({ path: 'C:\\Users\\Jason\\Desktop\\react-financial-charts\\.env' });
 const express = require('express');
 const Alpaca = require('@alpacahq/alpaca-trade-api');
 
@@ -18,7 +19,7 @@ app.use((req, res, next) => {
 
 app.get('/', (req, res) => {
     alpaca.getBars('1Min', ['AAPL'], {limit: 5}).then((response) => {
-        res.send(JSON.stringify(response));
+        res.send(response);
     });
 });
 
