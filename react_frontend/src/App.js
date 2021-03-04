@@ -4,9 +4,12 @@ import Header from "./components/header"
 import Instruments from "./components/instruments"
 import './App.css';
 import sampleData from './components/data/sample-data';
-import {auth} from './configs';
 
 const socket = new WebSocket("wss://socket.polygon.io/stocks");
+const auth = {
+  action:"auth", 
+  params: process.env.API_KEY
+}; 
 
 export default function App() {
   const [data, setData] = useState(sampleData);
@@ -35,7 +38,9 @@ export default function App() {
     };
     socket.onerror = function(error) {
       alert(`Error: ${error.message}`);
-    };  
+    };
+
+    fetch("/").then(res => console.log(res.json()));
   }, []);
 
   // Connect to new instrument websocket when instrument state changes
