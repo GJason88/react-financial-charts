@@ -5,11 +5,13 @@ import Instruments from "./components/instruments"
 import './App.css';
 import sampleData from './components/data/sample-data';
 
-const socket = new WebSocket("wss://socket.polygon.io/stocks");
+require('dotenv').config();
+const socket = new WebSocket("wss://stream.data.alpaca.markets/v2/iex");
 const auth = {
-  action:"auth", 
-  params: process.env.API_KEY
-}; 
+  "action": "auth", 
+  "key": process.env.REACT_APP_API_KEY, 
+  "secret": process.env.REACT_APP_SECRET_API_KEY
+};
 
 export default function App() {
   const [data, setData] = useState(sampleData);
@@ -19,13 +21,12 @@ export default function App() {
 
   // Connect to polygon websocket on didmount
   useEffect(function() {
+    socket.onmessage = (e) => {
+      console.log(`Message: Data received from server: ${e.data}`);
+    };
     socket.onopen = (e) => {
-      console.log("Open: Connection established to Polygon.io Stock Streaming WebSocket");
       socket.send(JSON.stringify(auth));
-      socket.send(JSON.stringify({action:"subscribe", params:"T.MSFT"}));
-      socket.onmessage = (e) => {
-        console.log(`Message: Data received from server: ${e.data}`);
-      };
+      socket.send(JSON.stringify({"action":"subscribe","quotes":["MSFT"]}));
     };
     socket.onclose = function(event) {
       if (event.wasClean) {
@@ -40,19 +41,19 @@ export default function App() {
       alert(`Error: ${error.message}`);
     };
 
-    fetch("/").then(res => console.log(res.json()));
+    fetch("/").then(res => console.log(JSON.stringify(res)));
   }, []);
 
   // Connect to new instrument websocket when instrument state changes
   useEffect(function() {
-    if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({action:"subscribe", params:"T." + instrument}));
+    if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({action:"subscribe", "quotes":[instrument]}));
   }, [instrument]);
 
   // Handler function for 
   function changeInstrument(cur) {
     if (socket.readyState === WebSocket.OPEN) {
       // Disconnect from current instrument
-      socket.send(JSON.stringify({action:"unsubscribe", params:"T." + instrument}));
+      socket.send(JSON.stringify({action:"unsubscribe", "quotes":[instrument]}));
       // Log unsubscribe message
       socket.onmessage = (e) => {
         console.log(e.data);
