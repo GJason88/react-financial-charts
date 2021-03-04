@@ -1,18 +1,19 @@
 {
-  "name": "proxy",
-  "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "name": "react-backend",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "start": "nodemon ./bin/www"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@alpacahq/alpaca-trade-api": "^1.4.2",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
     "dotenv": "^8.2.0",
-    "express": "^4.17.1",
+    "express": "~4.16.1",
+    "http-errors": "^1.6.3",
+    "jade": "~1.11.0",
+    "morgan": "~1.9.1",
     "nodemon": "^2.0.7"
   }
 }

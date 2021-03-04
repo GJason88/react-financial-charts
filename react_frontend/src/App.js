@@ -41,7 +41,7 @@ export default function App() {
       alert(`Error: ${error.message}`);
     };
 
-    fetch("/").then(res => console.log(JSON.stringify(res)));
+    fetch("/getBars").then(res => res.json()).then(r => console.log(r));
   }, []);
 
   // Connect to new instrument websocket when instrument state changes

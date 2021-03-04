@@ -3,6 +3,7 @@
 # dependencies
 react_frontend/node_modules
 proxy/node_modules
+proxy/react-backend/node_modules
 /.pnp
 .pnp.js
 

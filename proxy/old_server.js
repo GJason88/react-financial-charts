@@ -17,9 +17,9 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/', (req, res) => {
+app.get('/aapl', (req, res) => {
     alpaca.getBars('1Min', ['AAPL'], {limit: 5}).then((response) => {
-        res.send(response);
+        res.send(JSON.stringify(response));
     });
 });
 
