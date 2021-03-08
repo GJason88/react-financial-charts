@@ -16,6 +16,7 @@ const auth = {
 export default function App() {
   const [data, setData] = useState(sampleData);
   const [instrument, setInstrument] = useState("MSFT");
+  const [granularity, setGranularity] = useState("1Min");
   const [minDate, setMinDate] = useState(new Date("2012-01-01"));
   const [maxDate, setMaxDate] = useState(new Date("2012-01-23"));
 
@@ -41,7 +42,9 @@ export default function App() {
       alert(`Error: ${error.message}`);
     };
 
-    fetch("/getBars").then(res => res.json()).then(r => console.log(r));
+    fetch("/getBars?instrument=" + instrument + "&granularity=" + granularity)
+    .then(promise => promise.json())
+    .then(res => console.log(res));
   }, []);
 
   // Connect to new instrument websocket when instrument state changes

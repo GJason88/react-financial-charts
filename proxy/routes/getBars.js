@@ -11,11 +11,22 @@ const alpaca = new Alpaca({
   usePolygon: false
 });
 
+router.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  next();
+});
+
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-  alpaca.getBars('1Min', ['AAPL'], {limit: 5}).then((response) => {
-    res.json(response);
-  });
+  if (req.query.instrument && req.query.granularity) {
+    alpaca.getBars(req.query.granularity, [req.query.instrument], {limit: 5})
+    .then((response) => {
+      res.json(response);
+    })
+    .catch(() => res.send("Alpaca API Error"));
+  } else {
+    res.send("must provide instrument and granularity");
+  }
 });
 
 module.exports = router;
