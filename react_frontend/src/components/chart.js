@@ -21,13 +21,7 @@ export default function Chart(props) {
           color: "#ff8a8c",
           dataPoints: props.data
         }]
-    }],
-    navigator: {
-      slider: {
-        minimum: props.minDate,
-        maximum: props.maxDate
-      }
-    }
+    }]
   };
   return (
     <div>

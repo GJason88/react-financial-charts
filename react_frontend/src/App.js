@@ -14,11 +14,9 @@ const auth = {
 };
 
 export default function App() {
-  const [data, setData] = useState(sampleData);
+  const [data, setData] = useState([]);
   const [instrument, setInstrument] = useState("MSFT");
-  const [granularity, setGranularity] = useState("1Min");
-  const [minDate, setMinDate] = useState(new Date("2012-01-01"));
-  const [maxDate, setMaxDate] = useState(new Date("2012-01-23"));
+  const [granularity, setGranularity] = useState("day");
 
   // Connect to polygon websocket on didmount
   useEffect(function() {
@@ -42,10 +40,26 @@ export default function App() {
       alert(`Error: ${error.message}`);
     };
 
+    // Fetch first 1000 candlesticks for default granularity and instrument
     fetch("/getBars?instrument=" + instrument + "&granularity=" + granularity)
     .then(promise => promise.json())
-    .then(res => console.log(res));
+    .then(res => setData(reformatData(res)));
   }, []);
+
+  // Helper function to reformat fetched data into canvasJS data
+  function reformatData(data) {
+    let reformattedData = [];
+    let candlesticks = data[instrument];
+    for (let candlestick of candlesticks) {
+      reformattedData.push({
+        x: new Date(candlestick.startEpochTime*1000),
+        y: [candlestick.openPrice, candlestick.highPrice, candlestick.lowPrice, candlestick.closePrice]
+      });
+    }
+    return reformattedData;
+  }
+
+
 
   // Connect to new instrument websocket when instrument state changes
   useEffect(function() {
@@ -75,7 +89,7 @@ export default function App() {
       <header><Header inst={instrument} /></header>
       <main>
         <Instruments defaultInstrument={instrument} changeHandler={changeInstrument} />
-        <Chart data={data} instrument={instrument} minDate={minDate} maxDate={maxDate} />
+        <Chart data={data} instrument={instrument} />
       </main>
     </div>
   );

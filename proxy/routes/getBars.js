@@ -19,7 +19,7 @@ router.use((req, res, next) => {
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   if (req.query.instrument && req.query.granularity) {
-    alpaca.getBars(req.query.granularity, [req.query.instrument], {limit: 5})
+    alpaca.getBars(req.query.granularity, [req.query.instrument], {limit: 100})
     .then((response) => {
       res.json(response);
     })
