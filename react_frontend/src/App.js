@@ -16,7 +16,7 @@ const auth = {
 export default function App() {
   const [data, setData] = useState([]);
   const [instrument, setInstrument] = useState("MSFT");
-  const [granularity, setGranularity] = useState("1Hour");
+  const [granularity, setGranularity] = useState("day");
 
   // Connect to polygon websocket on didmount
   useEffect(function() {
@@ -65,17 +65,16 @@ export default function App() {
     fetch("/getBars?instrument=" + instrument + "&granularity=" + granularity)
     .then(promise => promise.json())
     .then(res => {
-      console.log(res);
-      // // Reformat data to fit into canvasJS chart settings
-      // let reformattedData = [];
-      // let candlesticks = res[bars];
-      // for (let candlestick of candlesticks) {
-      //   reformattedData.push({
-      //     x: new Date(candlestick.t),
-      //     y: [candlestick.o, candlestick.h, candlestick.l, candlestick.c]
-      //   });
-      // }
-      // setData(reformattedData);
+      // Reformat data to fit into canvasJS chart settings
+      let reformattedData = [];
+      let candlesticks = res[instrument];
+      for (let candlestick of candlesticks) {
+        reformattedData.push({
+          x: new Date(candlestick.t*1000),
+          y: [candlestick.o, candlestick.h, candlestick.l, candlestick.c]
+        });
+      }
+      setData(reformattedData);
     });
   }
 

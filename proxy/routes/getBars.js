@@ -17,40 +17,17 @@ router.use((req, res, next) => {
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   if (req.query.instrument && req.query.granularity) {
-    let curDate = new Date();
-    let startDate = getStartDate(curDate, req.query.granularity, 1000);
-    if (startDate) {
-      fetch("https://data.alpaca.markets/v2/stocks/" + req.query.instrument + "/bars?start=2021-01-01T13:00:00Z&end=" + curDate.toISOString() + "&timeframe=" + req.query.granularity, {headers:headers})
-      .then((response) => {
-        return response.json();
-      })
-      .then((response) => {
-        res.json(response);
-      })
-      .catch(() => res.send("Alpaca API Error"));
-    }
-    else {
-      res.send("Error: invalid granularity");
-    }
+    fetch("https://data.alpaca.markets/v1/bars/" + req.query.granularity + "?limit=500&symbols=" + req.query.instrument, {headers:headers})
+    .then((response) => {
+      return response.json();
+    })
+    .then((response) => {
+      res.json(response);
+    })
+    .catch(() => res.send("Alpaca API Error"));
   } else {
     res.send("Error: must provide instrument and granularity");
   }
 });
-
-// Gets start date a given number of units away from current date
-function getStartDate(curDate, granularity, num) {
-  let numMins = num*60000;
-  let numHours = numMinutes*60;
-  let numDays = numHours*24;
-  if (granularity === "1Min") {
-    return new Date(curDate.getTime() - numMinutes);
-  }
-  else if (granularity === "1Hour") {
-    return new Date(curDate.getTime() - numHours);
-  }
-  else if (granularity === "1Day") {
-  }
-  return null;
-}
 
 module.exports = router;
