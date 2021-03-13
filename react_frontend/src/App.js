@@ -16,7 +16,7 @@ const auth = {
 export default function App() {
   const [data, setData] = useState([]);
   const [instrument, setInstrument] = useState("MSFT");
-  const [granularity, setGranularity] = useState("day");
+  const [granularity, setGranularity] = useState("1Hour");
 
   // Connect to polygon websocket on didmount
   useEffect(function() {
@@ -39,31 +39,12 @@ export default function App() {
     socket.onerror = function(error) {
       alert(`Error: ${error.message}`);
     };
-
-    // Fetch first 1000 candlesticks for default granularity and instrument
-    fetch("/getBars?instrument=" + instrument + "&granularity=" + granularity)
-    .then(promise => promise.json())
-    .then(res => setData(reformatData(res)));
   }, []);
-
-  // Helper function to reformat fetched data into canvasJS data
-  function reformatData(data) {
-    let reformattedData = [];
-    let candlesticks = data[instrument];
-    for (let candlestick of candlesticks) {
-      reformattedData.push({
-        x: new Date(candlestick.startEpochTime*1000),
-        y: [candlestick.openPrice, candlestick.highPrice, candlestick.lowPrice, candlestick.closePrice]
-      });
-    }
-    return reformattedData;
-  }
-
-
 
   // Connect to new instrument websocket when instrument state changes
   useEffect(function() {
     if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({action:"subscribe", "quotes":[instrument]}));
+    initializeChart();
   }, [instrument]);
 
   // Handler function for 
@@ -77,11 +58,25 @@ export default function App() {
       };
     }
     setInstrument(cur);
-    updateChart();
   }
 
-  function updateChart() {
-    
+  // Fetch first 1000 candlesticks for default granularity and instrument
+  function initializeChart() {
+    fetch("/getBars?instrument=" + instrument + "&granularity=" + granularity)
+    .then(promise => promise.json())
+    .then(res => {
+      console.log(res);
+      // // Reformat data to fit into canvasJS chart settings
+      // let reformattedData = [];
+      // let candlesticks = res[bars];
+      // for (let candlestick of candlesticks) {
+      //   reformattedData.push({
+      //     x: new Date(candlestick.t),
+      //     y: [candlestick.o, candlestick.h, candlestick.l, candlestick.c]
+      //   });
+      // }
+      // setData(reformattedData);
+    });
   }
 
   return (
