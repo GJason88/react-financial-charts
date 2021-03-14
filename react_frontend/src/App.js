@@ -18,14 +18,18 @@ export default function App() {
   const [instrument, setInstrument] = useState("MSFT");
   const [granularity, setGranularity] = useState("1Min");
 
-  // Connect to polygon websocket on didmount
+  // Set up websocket listeners on didmount
   useEffect(function() {
     socket.onmessage = (e) => {
+      dataObject = JSON.parse(e.data)[0] // comes in as a json string
+      if (dataObject.T === "b") { // only update chart data if new message is a bar "b" update
+        updateChart(dataObject);
+      }
       console.log(`Message: Data received from server: ${e.data}`);
     };
     socket.onopen = (e) => {
       socket.send(JSON.stringify(auth));
-      socket.send(JSON.stringify({"action":"subscribe","quotes":["MSFT"]}));
+      socket.send(JSON.stringify({"action":"subscribe","bars":[instrument]}));
     };
     socket.onclose = function(event) {
       if (event.wasClean) {
@@ -43,7 +47,7 @@ export default function App() {
 
   // Connect to new instrument websocket when instrument state changes
   useEffect(function() {
-    if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({action:"subscribe", "quotes":[instrument]}));
+    if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({action:"subscribe", "bars":[instrument]}));
     initializeChart();
   }, [instrument]);
 
@@ -51,11 +55,7 @@ export default function App() {
   function changeInstrument(cur) {
     if (socket.readyState === WebSocket.OPEN) {
       // Disconnect from current instrument
-      socket.send(JSON.stringify({action:"unsubscribe", "quotes":[instrument]}));
-      // Log unsubscribe message
-      socket.onmessage = (e) => {
-        console.log(e.data);
-      };
+      socket.send(JSON.stringify({action:"unsubscribe", "bars":[instrument]}));
     }
     setInstrument(cur);
   }
@@ -76,6 +76,10 @@ export default function App() {
       }
       setData(reformattedData);
     });
+  }
+
+  function updateChart() {
+    // TODO
   }
 
   return (
