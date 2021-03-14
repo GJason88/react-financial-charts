@@ -16,7 +16,7 @@ const auth = {
 export default function App() {
   const [data, setData] = useState([]);
   const [instrument, setInstrument] = useState("MSFT");
-  const [granularity, setGranularity] = useState("day");
+  const [granularity, setGranularity] = useState("1Min");
 
   // Connect to polygon websocket on didmount
   useEffect(function() {
@@ -83,7 +83,7 @@ export default function App() {
       <header><Header inst={instrument} /></header>
       <main>
         <Instruments defaultInstrument={instrument} changeHandler={changeInstrument} />
-        <Chart data={data} instrument={instrument} />
+        <Chart data={data} instrument={instrument} dateFormat={granularity === "day" ? "MM/DD/YY" : "MM/DD/YY H:mm"} />
       </main>
     </div>
   );

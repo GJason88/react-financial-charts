@@ -14,9 +14,15 @@ export default function Chart(props) {
     title: {
         text: props.instrument
     },
+    axisX: {
+      crosshair: {
+          enabled: true
+      }
+    },
     charts: [{
         data: [{
           type: "candlestick",
+          xValueFormatString: props.dateFormat,
           risingColor: "#97ff8a",
           color: "#ff8a8c",
           dataPoints: props.data
