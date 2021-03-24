@@ -31,7 +31,7 @@ export default function Chart(props) {
   };
   return (
     <div>
-        <CanvasJSStockChart options={options} containerProps={containerProps} />
+      <CanvasJSStockChart options={options} containerProps={containerProps} />
     </div>
   )
 }

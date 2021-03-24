@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Chart from "./components/chart"
 import Header from "./components/header"
 import Instruments from "./components/instruments"
+import Granularity from "./components/granularity"
 import './App.css';
 import sampleData from './components/data/sample-data';
 
@@ -16,12 +17,12 @@ const auth = {
 export default function App() {
   const [data, setData] = useState([]);
   const [instrument, setInstrument] = useState("MSFT");
-  const [granularity, setGranularity] = useState("1Min");
+  const [granularity, setGranularity] = useState("day");
 
   // Set up websocket listeners on didmount
   useEffect(function() {
     socket.onmessage = (e) => {
-      dataObject = JSON.parse(e.data)[0] // comes in as a json string
+      let dataObject = JSON.parse(e.data)[0] // comes in as a json string
       if (dataObject.T === "b") { // only update chart data if new message is a bar "b" update
         updateChart(dataObject);
       }
@@ -51,7 +52,10 @@ export default function App() {
     initializeChart();
   }, [instrument]);
 
-  // Handler function for 
+  // Reinitialize chart on granularity change
+  useEffect(initializeChart, [granularity]);
+
+  // Handler function for changing instrument
   function changeInstrument(cur) {
     if (socket.readyState === WebSocket.OPEN) {
       // Disconnect from current instrument
@@ -68,13 +72,15 @@ export default function App() {
       // Reformat data to fit into canvasJS chart settings
       let reformattedData = [];
       let candlesticks = res[instrument];
-      for (let candlestick of candlesticks) {
-        reformattedData.push({
-          x: new Date(candlestick.t*1000),
-          y: [candlestick.o, candlestick.h, candlestick.l, candlestick.c]
-        });
+      if (candlesticks) {
+        for (let candlestick of candlesticks) {
+          reformattedData.push({
+            x: new Date(candlestick.t*1000),
+            y: [candlestick.o, candlestick.h, candlestick.l, candlestick.c]
+          });
+        }
+        setData(reformattedData);        
       }
-      setData(reformattedData);
     });
   }
 
@@ -87,6 +93,7 @@ export default function App() {
       <header><Header inst={instrument} /></header>
       <main>
         <Instruments defaultInstrument={instrument} changeHandler={changeInstrument} />
+        <Granularity curGranularity={granularity} changeHandler={newGranularity => setGranularity(newGranularity)}/>
         <Chart data={data} instrument={instrument} dateFormat={granularity === "day" ? "MM/DD/YY" : "MM/DD/YY H:mm"} />
       </main>
     </div>
