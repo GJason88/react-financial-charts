@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Chart from "./components/chart"
 import Header from "./components/header"
 import Instruments from "./components/instruments"
@@ -15,6 +15,7 @@ const auth = {
 };
 
 export default function App() {
+  const didMountRef = useRef(false);
   const [data, setData] = useState([]);
   const [instrument, setInstrument] = useState("MSFT");
   const [granularity, setGranularity] = useState("day");
@@ -53,7 +54,15 @@ export default function App() {
   }, [instrument]);
 
   // Reinitialize chart on granularity change
-  useEffect(initializeChart, [granularity]);
+  useEffect(function() {
+    console.log(didMountRef.current);
+    if (didMountRef.current) {
+      initializeChart();
+    }
+    else {
+      didMountRef.current = true;
+    }
+  }, [granularity]);
 
   // Handler function for changing instrument
   function changeInstrument(cur) {
