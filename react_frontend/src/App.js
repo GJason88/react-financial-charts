@@ -18,7 +18,7 @@ export default function App() {
   const didMountRef = useRef(false);
   const [data, setData] = useState([]);
   const [instrument, setInstrument] = useState("MSFT");
-  const [granularity, setGranularity] = useState("day");
+  const [granularity, setGranularity] = useState("1Min");
 
   // Set up websocket listeners on didmount
   useEffect(function() {
@@ -55,7 +55,6 @@ export default function App() {
 
   // Reinitialize chart on granularity change
   useEffect(function() {
-    console.log(didMountRef.current);
     if (didMountRef.current) {
       initializeChart();
     }
@@ -88,13 +87,36 @@ export default function App() {
             y: [candlestick.o, candlestick.h, candlestick.l, candlestick.c]
           });
         }
-        setData(reformattedData);        
+        setData(reformattedData);
+        console.log(reformattedData[reformattedData.length - 1]);
       }
     });
   }
 
-  function updateChart() {
-    // TODO
+  function updateChart(barData) {
+    let newDate = new Date(barData.t);
+    let lastDate = data[data.length - 1].x;
+    let ohlc = [barData.o,barData.h,barData.l,barData.c];
+
+    if (granularity === "1Min") {
+      if (lastDate.getMinutes() === newDate.getMinutes()) {
+        let updatedData = [...data];
+        updatedData[data.length - 1].y = ohlc;
+        setData(updatedData);
+      }
+      else {
+        setData(prevData => [...prevData, {x: newDate, y: ohlc}])
+      }
+    }
+    else if (granularity === "5Min") {
+
+    }
+    else if (granularity === "15Min") {
+
+    }
+    else if (granularity === "day") {
+
+    }
   }
 
   return (
