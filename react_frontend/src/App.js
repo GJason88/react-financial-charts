@@ -88,7 +88,7 @@ export default function App() {
           });
         }
         setData(reformattedData);
-        console.log(reformattedData[reformattedData.length - 1]);
+        console.log((reformattedData[reformattedData.length - 1].x - reformattedData[reformattedData.length - 2].x)/(1000*60));
       }
     });
   }
@@ -99,7 +99,20 @@ export default function App() {
     let ohlc = [barData.o,barData.h,barData.l,barData.c];
 
     if (granularity === "1Min") {
-      if (lastDate.getMinutes() === newDate.getMinutes()) {
+      addOrUpdateBar(1);
+    }
+    else if (granularity === "5Min") {
+      addOrUpdateBar(5);
+    }
+    else if (granularity === "15Min") {
+      addOrUpdateBar(15);
+    }
+    else if (granularity === "day") {
+      addOrUpdateBar(1440);
+    }
+
+    function addOrUpdateBar(minutes) {
+      if ((newDate.getMinutes() - lastDate.getMinutes()) / (1000*60) < minutes) { // check if over {minutes} has passed from last bar data to this bar data
         let updatedData = [...data];
         updatedData[data.length - 1].y = ohlc;
         setData(updatedData);
@@ -107,15 +120,6 @@ export default function App() {
       else {
         setData(prevData => [...prevData, {x: newDate, y: ohlc}])
       }
-    }
-    else if (granularity === "5Min") {
-
-    }
-    else if (granularity === "15Min") {
-
-    }
-    else if (granularity === "day") {
-
     }
   }
 
